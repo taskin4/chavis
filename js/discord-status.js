@@ -98,9 +98,10 @@ class DiscordStatusTracker {
             };
             
             this.eventSource.onmessage = (event) => {
+                console.log('SSE message received:', event.data);
                 try {
-                    console.log('SSE message received:', event.data);
                     const data = JSON.parse(event.data);
+                    console.log('Parsed data:', data);
                     if (data.success) {
                         console.log('Discord status data:', data.data);
                         this.updateStatus(data.data);
