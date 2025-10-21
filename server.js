@@ -126,6 +126,7 @@ class DiscordStatusManager {
   }
 
   broadcastToClients(data) {
+    console.log(`Broadcasting to ${sseClients.size} SSE clients`);
     const message = JSON.stringify({
       success: true,
       data: {
@@ -140,9 +141,12 @@ class DiscordStatusManager {
       }
     });
 
+    console.log('Broadcasting message:', message);
+
     sseClients.forEach(client => {
       try {
         client.write(`data: ${message}\n\n`);
+        console.log('Message sent to SSE client');
       } catch (error) {
         console.error('Error broadcasting to SSE client:', error);
         sseClients.delete(client);
@@ -315,20 +319,6 @@ app.get('/api/discord/status', (req, res) => {
       error: 'Internal server error',
       message: 'Failed to fetch Discord status'
     });
-  }
-});
-
-// RPC endpoint (Netlify uyumluluğu için)
-app.get('/.netlify/functions/getRpc', (req, res) => {
-  try {
-    // Basit bir SVG döndür
-    const svgData = {
-      base64SVG: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNoYXZpczwvdGV4dD48L3N2Zz4='
-    };
-    res.json(svgData);
-  } catch (error) {
-    console.error('Error generating RPC data:', error);
-    res.status(500).json({ error: 'Failed to generate RPC data' });
   }
 });
 
