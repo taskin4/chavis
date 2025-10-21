@@ -89,3 +89,4 @@ window.addEventListener('beforeunload', function() {
         window.overlayTypewriter.stop();
     }
 });
+

@@ -38,14 +38,14 @@ npm run dev
 npm start
 ```
 
-Sunucu varsayılan olarak `http://localhost:3000` adresinde çalışacaktır.
+Sunucu varsayılan olarak `http://localhost:3000` adresinde çalışacaktır. Üretim ortamında `https://chavis.com.tr` domain'ini kullanın.
 
 ### 3. Frontend'i Güncelleyin
 
 `js/badges2.js` dosyasındaki `API_BASE_URL` değişkenini kendi domain'inizle değiştirin:
 
 ```javascript
-const API_BASE_URL = 'https://your-domain.com';
+const API_BASE_URL = 'https://chavis.com.tr';
 ```
 
 ## 🔧 API Endpoints
@@ -175,7 +175,7 @@ Aşağıdaki ortam değişkenlerini ayarlayabilirsiniz:
 
 ```bash
 PORT=3000                                    # Sunucu portu
-ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com  # İzin verilen origin'ler
+ALLOWED_ORIGINS=http://localhost:3000,https://chavis.com.tr  # İzin verilen origin'ler
 ```
 
 ## 📊 Rate Limiting

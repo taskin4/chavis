@@ -67,7 +67,7 @@ function stopTypewriter() {
 class DiscordStatusTracker {
     constructor() {
         this.eventSource = null;
-        this.apiBaseUrl = 'http://localhost:3000'; 
+        this.apiBaseUrl = 'https://chavis.com.tr'; 
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
         
