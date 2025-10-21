@@ -126,7 +126,6 @@ class DiscordStatusManager {
   }
 
   broadcastToClients(data) {
-    console.log(`Broadcasting to ${sseClients.size} SSE clients`);
     const message = JSON.stringify({
       success: true,
       data: {
@@ -141,12 +140,9 @@ class DiscordStatusManager {
       }
     });
 
-    console.log('Broadcasting message:', message);
-
     sseClients.forEach(client => {
       try {
         client.write(`data: ${message}\n\n`);
-        console.log('Message sent to SSE client');
       } catch (error) {
         console.error('Error broadcasting to SSE client:', error);
         sseClients.delete(client);
