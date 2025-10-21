@@ -89,18 +89,20 @@ class DiscordStatusTracker {
 
     connectSSE() {
         try {
-            
+            console.log(`Connecting to SSE: ${this.apiBaseUrl}/api/discord/status/stream`);
             this.eventSource = new EventSource(`${this.apiBaseUrl}/api/discord/status/stream`);
             
             this.eventSource.onopen = () => {
-                console.log('connected');
+                console.log('SSE connected successfully');
                 this.reconnectAttempts = 0;
             };
             
             this.eventSource.onmessage = (event) => {
                 try {
+                    console.log('SSE message received:', event.data);
                     const data = JSON.parse(event.data);
                     if (data.success) {
+                        console.log('Discord status data:', data.data);
                         this.updateStatus(data.data);
                     }
                 } catch (error) {
@@ -131,14 +133,17 @@ class DiscordStatusTracker {
     }
     
     updateStatus(userData) {
+        console.log('updateStatus called with:', userData);
+        
         if (!userData || !userData.discord_status) {
-            console.warn('Invalid user data received');
+            console.warn('Invalid user data received:', userData);
             return;
         }
         
         const status = userData.discord_status;
         const statusIcon = this.statusIcons[status] || this.statusIcons['offline'];
         
+        console.log(`Updating status to: ${status}`);
         
         const statusIconElement = document.querySelector('.status-icon');
         if (statusIconElement) {
@@ -149,37 +154,33 @@ class DiscordStatusTracker {
             console.warn('Status icon element not found');
         }
         
-        
         const usernameElement = document.querySelector('.username');
         if (usernameElement && userData.discord_user && userData.discord_user.global_name) {
-            
+            console.log(`Updating username to: ${userData.discord_user.global_name}`);
             if (usernameElement.textContent !== userData.discord_user.global_name) {
                 usernameElement.textContent = userData.discord_user.global_name;
             }
         }
         
-        
         const bioElement = document.querySelector('.bio');
         if (bioElement) {
             let newText = '';
             if (userData.activities && userData.activities.length > 0) {
-                
+                console.log('Activities found:', userData.activities);
                 const customStatus = userData.activities.find(activity => activity.type === 4);
                 if (customStatus && customStatus.state) {
                     newText = customStatus.state;
+                    console.log('Custom status found:', customStatus.state);
                 }
             }
             
-            
+            console.log(`Bio text: "${newText}"`);
             if (bioElement.dataset.targetText !== newText) {
                 bioElement.dataset.targetText = newText;
                 startTypewriter(bioElement, newText);
                 console.log(`bio updated; ${newText || '(empty)'}`);
             }
         }
-        
-        
-        
     }
     
     
