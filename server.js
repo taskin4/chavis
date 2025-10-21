@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const WebSocket = require('ws');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,8 +18,30 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// In-memory storage for view count (in production, use a database)
-let viewCount = 654; // Starting with your current count
+// View count storage file
+const VIEW_COUNT_FILE = path.join(__dirname, 'viewcount.json');
+
+// Load view count from file
+let viewCount = 654;
+try {
+  if (fs.existsSync(VIEW_COUNT_FILE)) {
+    const data = fs.readFileSync(VIEW_COUNT_FILE, 'utf8');
+    const parsed = JSON.parse(data);
+    viewCount = parsed.count || 654;
+    console.log(`Loaded view count from file: ${viewCount}`);
+  }
+} catch (error) {
+  console.error('Error loading view count:', error);
+}
+
+// Save view count to file
+function saveViewCount() {
+  try {
+    fs.writeFileSync(VIEW_COUNT_FILE, JSON.stringify({ count: viewCount }, null, 2));
+  } catch (error) {
+    console.error('Error saving view count:', error);
+  }
+}
 
 // Discord status cache
 let discordStatusCache = {
@@ -200,6 +223,7 @@ app.get('/api/views', (req, res) => {
 app.post('/api/views/increment', rateLimit, (req, res) => {
   try {
     viewCount += 1;
+    saveViewCount();
     res.json({ 
       views: viewCount,
       message: 'View count incremented successfully'
@@ -225,6 +249,7 @@ app.put('/api/views', rateLimit, (req, res) => {
     }
     
     viewCount = views;
+    saveViewCount();
     res.json({ 
       views: viewCount,
       message: 'View count updated successfully'
