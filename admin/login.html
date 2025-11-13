@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        :root {
+            --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            
+            color-scheme: dark;
+            --background: oklch(17.22% .0041 75);
+            --foreground: oklch(94.7% .0414 75);
+            --primary: oklch(87.75% .0458 75);
+            --primary-foreground: oklch(20.9% .006 75);
+            --secondary: oklch(20.9% .006 75);
+            --secondary-foreground: oklch(68.14% .0243 75);
+            --muted: oklch(20.9% .006 75);
+            --muted-foreground: oklch(68.14% .0243 75);
+            --accent: oklch(20.9% .006 75);
+            --accent-foreground: oklch(99.27% .0364 75);
+            --destructive: oklch(70.4% .191 22);
+            --border: oklch(30.74% .0087 75);
+            --ring: oklch(48.56% .0171 75);
+            
+            --default-font-family: var(--font-sans);
+            --default-mono-font-family: var(--font-mono);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--default-font-family);
+            background: var(--background);
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--background);
+            z-index: -2;
+        }
+        
+        video.background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .login-container {
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .subtitle {
+            color: var(--muted-foreground);
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--foreground);
+        }
+        
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--foreground);
+            font-size: 0.9375rem;
+            font-family: var(--default-font-family);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 3px oklch(48.56% .0171 75 / 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            font-family: var(--default-font-family);
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            background: oklch(70.4% .191 22 / 0.2);
+            border: 1px solid var(--destructive);
+            color: var(--destructive);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .question-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .question-modal.show {
+            display: flex;
+        }
+        
+        .question-modal-content {
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        
+        .question-modal-content h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .question-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .question-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            font-family: var(--default-font-family);
+        }
+        
+        .question-btn.yes {
+            background: var(--primary);
+            color: var(--primary-foreground);
+        }
+        
+        .question-btn.no {
+            background: var(--destructive);
+            color: white;
+        }
+        
+        .question-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .question-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <video class="background" autoplay loop muted>
+        <source src="/images/bgvideo.mp4" type="video/mp4">
+    </video>
+    
+    <div class="login-container">
+        <h1>Admin Panel</h1>
+        <p class="subtitle">Giriş yapmak için bilgilerinizi girin</p>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Kullanıcı Adı</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" id="loginButton">Giriş Yap</button>
+        </form>
+    </div>
+    
+    <div class="question-modal" id="questionModal">
+        <div class="question-modal-content">
+            <h2>ben malım</h2>
+            <div class="question-buttons">
+                <button class="question-btn yes" id="yesBtn">Evet</button>
+                <button class="question-btn no" id="noBtn">Hayır</button>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="backgroundAudio" loop style="display: none;"></audio>
+    
+    <script>
+        const adminSongs = [
+            '/media/admin.mp3',
+            '/media/admin2.mp3',
+            '/media/admin3.mp3',
+            '/media/admin4.mp3'
+        ];
+        
+        const audio = document.getElementById('backgroundAudio');
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginButton = document.getElementById('loginButton');
+        
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const randomSong = adminSongs[Math.floor(Math.random() * adminSongs.length)];
+            audio.src = randomSong;
+            audio.volume = 0.5;
+            audio.play().catch(err => {
+                console.log('Audio play prevented:', err);
+            });
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            loginButton.disabled = true;
+            loginButton.textContent = 'Giriş yapılıyor...';
+            errorMessage.classList.remove('show');
+            
+            try {
+                const response = await fetch('/987654321admin123456789/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const questionModal = document.getElementById('questionModal');
+                    questionModal.classList.add('show');
+                    
+                    document.getElementById('yesBtn').addEventListener('click', () => {
+                        questionModal.classList.remove('show');
+                        window.location.href = '/987654321admin123456789';
+                    });
+                    
+                    document.getElementById('noBtn').addEventListener('click', () => {
+                        window.location.href = 'https://youtu.be/c1GmA05MIbw?list=RDc1GmA05MIbw&t=33';
+                    });
+                } else {
+                    audio.pause();
+                    errorMessage.textContent = data.error || 'Giriş başarısız';
+                    errorMessage.classList.add('show');
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Giriş Yap';
+                }
+            } catch (error) {
+                audio.pause();
+                errorMessage.textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+                errorMessage.classList.add('show');
+                loginButton.disabled = false;
+                loginButton.textContent = 'Giriş Yap';
+            }
+        });
+    </script>
+</body>
+</html>
+

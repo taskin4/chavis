@@ -1,0 +1,44 @@
+{
+  "links": [
+    {
+      "id": "discord",
+      "label": "Discord",
+      "enabled": true,
+      "url": "https://discord.gg/ornek",
+      "iconPath": "/images/icon_discord_1763050951617.png",
+      "order": 4
+    },
+    {
+      "id": "youtube",
+      "label": "YouTube",
+      "enabled": false,
+      "url": "https://youtASDube.com/@ornek",
+      "iconPath": "/images/youtube.png",
+      "order": 1
+    },
+    {
+      "id": "roblox",
+      "label": "Roblox",
+      "enabled": false,
+      "url": "https://roblox.com/ornek",
+      "iconPath": "/images/roblox.png",
+      "order": 3
+    },
+    {
+      "id": "spotify",
+      "label": "Spotify",
+      "enabled": false,
+      "url": "https://open.spotasdify.com/ornek",
+      "iconPath": "/images/spotify.png",
+      "order": 2
+    },
+    {
+      "id": "custom_1763050536955",
+      "label": "12312",
+      "url": "asdas",
+      "enabled": false,
+      "iconPath": "/images/default.png",
+      "order": 5
+    }
+  ]
+}

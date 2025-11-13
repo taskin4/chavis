@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        :root {
+            --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            
+            color-scheme: dark;
+            --background: oklch(17.22% .0041 75);
+            --foreground: oklch(94.7% .0414 75);
+            --primary: oklch(87.75% .0458 75);
+            --primary-foreground: oklch(20.9% .006 75);
+            --secondary: oklch(20.9% .006 75);
+            --secondary-foreground: oklch(68.14% .0243 75);
+            --muted: oklch(20.9% .006 75);
+            --muted-foreground: oklch(68.14% .0243 75);
+            --accent: oklch(20.9% .006 75);
+            --accent-foreground: oklch(99.27% .0364 75);
+            --destructive: oklch(70.4% .191 22);
+            --border: oklch(30.74% .0087 75);
+            --ring: oklch(48.56% .0171 75);
+            
+            --default-font-family: var(--font-sans);
+            --default-mono-font-family: var(--font-mono);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--default-font-family);
+            background: var(--background);
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--secondary);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .sidebar h2 {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+        
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--foreground);
+            text-decoration: none;
+            display: block;
+        }
+        
+        .nav-item:hover {
+            background: var(--accent);
+        }
+        
+        .nav-item.active {
+            background: var(--accent);
+            color: var(--accent-foreground);
+        }
+        
+        .sidebar-scrolling-gifs {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            margin: 1rem 0;
+            min-height: 0;
+        }
+        
+        .sidebar-gifs-container {
+            display: flex;
+            flex-direction: column;
+            animation: sidebar-scroll 20s linear infinite;
+            gap: 1rem;
+        }
+        
+        .sidebar-gif {
+            width: 100%;
+            height: auto;
+            max-width: 200px;
+            flex-shrink: 0;
+            border-radius: 6px;
+        }
+        
+        @keyframes sidebar-scroll {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+        
+        .sidebar-scrolling-gifs:hover .sidebar-gifs-container {
+            animation-play-state: paused;
+        }
+        
+        .logout-btn {
+            margin-top: auto;
+            padding: 0.75rem 1rem;
+            background: var(--destructive);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--default-font-family);
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .logout-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .card {
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--foreground);
+        }
+        
+        input[type="text"],
+        input[type="url"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--foreground);
+            font-size: 0.9375rem;
+            font-family: var(--default-font-family);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 3px oklch(48.56% .0171 75 / 0.2);
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            font-family: var(--default-font-family);
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button.secondary {
+            background: var(--muted);
+            color: var(--muted-foreground);
+        }
+        
+        button.danger {
+            background: var(--destructive);
+            color: white;
+        }
+        
+        .success-message {
+            background: oklch(70% .15 150 / 0.2);
+            border: 1px solid oklch(70% .15 150);
+            color: oklch(70% .15 150);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .social-link-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .social-link-item.dragging {
+            opacity: 0.5;
+        }
+        
+        .drag-handle {
+            cursor: move;
+            font-size: 1.25rem;
+            color: var(--muted-foreground);
+        }
+        
+        .social-link-info {
+            flex: 1;
+        }
+        
+        .social-link-info strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        
+        .social-link-info small {
+            color: var(--muted-foreground);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--muted);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .whitelist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .whitelist-item code {
+            font-family: var(--default-mono-font-family);
+            color: var(--primary);
+        }
+        
+        .volume-slider {
+            height: 4px;
+            background: var(--muted);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .mute-button {
+            padding: 0.5rem 1rem;
+            background: var(--muted);
+            color: var(--muted-foreground);
+        }
+        
+        .volume-control {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: var(--secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .volume-control .volume-slider {
+            width: 4px;
+            height: 200px;
+            -webkit-appearance: slider-vertical;
+            writing-mode: bt-lr;
+            direction: rtl;
+            background: var(--muted);
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .volume-control .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .volume-control .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <a href="#" class="nav-item active" data-section="files">📁 Dosyalar</a>
+        <a href="#" class="nav-item" data-section="social">🔗 Sosyal İkonlar</a>
+        <a href="#" class="nav-item" data-section="whitelist">🔒 Whitelist</a>
+        
+        <div class="sidebar-scrolling-gifs">
+            <div class="sidebar-gifs-container">
+                <img src="/media/mustafa2k-osman.gif" alt="Scrolling GIF 1" class="sidebar-gif">
+                <img src="/media/monkey-monkey-talk.gif" alt="Scrolling GIF 2" class="sidebar-gif">
+                <img src="/media/KONUSMAAA.gif" alt="Scrolling GIF 3" class="sidebar-gif">
+                <img src="/media/mustafa2k-osman.gif" alt="Scrolling GIF 1" class="sidebar-gif">
+                <img src="/media/monkey-monkey-talk.gif" alt="Scrolling GIF 2" class="sidebar-gif">
+                <img src="/media/KONUSMAAA.gif" alt="Scrolling GIF 3" class="sidebar-gif">
+            </div>
+        </div>
+        
+        <button class="logout-btn" id="logoutBtn">Çıkış Yap</button>
+    </div>
+    
+    <div class="main-content">
+        <div class="success-message" id="successMessage"></div>
+        
+        <div class="section active" id="files">
+            <h1 style="margin-bottom: 2rem;">Dosya Yönetimi</h1>
+            
+            <div class="card">
+                <h3>Arka Plan Müziği</h3>
+                <div class="form-group">
+                    <label for="musicFile">music.mp3</label>
+                    <input type="file" id="musicFile" accept="audio/mp3">
+                    <button onclick="uploadFile('music', 'music.mp3', 'media')" style="margin-top: 0.5rem;">Yükle</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Görseller</h3>
+                <div class="form-group">
+                    <label for="pp2File">pp2.png (Discord Profil)</label>
+                    <input type="file" id="pp2File" accept="image/png">
+                    <button onclick="uploadFile('pp2', 'pp2.png', 'images')" style="margin-top: 0.5rem;">Yükle</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Cursor ve Avatar</h3>
+                <div class="form-group">
+                    <label for="cursorFile">cursor.png</label>
+                    <input type="file" id="cursorFile" accept="image/png">
+                    <button onclick="uploadFile('cursor', 'cursor.png', 'images')" style="margin-top: 0.5rem;">Yükle</button>
+                </div>
+                <div class="form-group">
+                    <label for="linkCursorFile">link-cursor.png</label>
+                    <input type="file" id="linkCursorFile" accept="image/png">
+                    <button onclick="uploadFile('linkCursor', 'link-cursor.png', 'images')" style="margin-top: 0.5rem;">Yükle</button>
+                </div>
+                <div class="form-group">
+                    <label for="avatarFile">avatar.gif</label>
+                    <input type="file" id="avatarFile" accept="image/gif">
+                    <button onclick="uploadFile('avatar', 'avatar.gif', 'images')" style="margin-top: 0.5rem;">Yükle</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Arka Plan Videosu</h3>
+                <div class="form-group">
+                    <label for="bgvideoFile">bgvideo.mp4</label>
+                    <input type="file" id="bgvideoFile" accept="video/mp4">
+                    <button onclick="uploadFile('bgvideo', 'bgvideo.mp4', 'images')" style="margin-top: 0.5rem;">Yükle</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section" id="social">
+            <h1 style="margin-bottom: 2rem;">Sosyal İkon Yönetimi</h1>
+            
+            <div class="card">
+                <h3>Mevcut İkonlar</h3>
+                <div id="socialLinksList"></div>
+            </div>
+            
+            <div class="card">
+                <h3>Yeni İkon Ekle</h3>
+                <div class="form-group">
+                    <label for="newLinkLabel">Label</label>
+                    <input type="text" id="newLinkLabel" placeholder="Örn: Discord">
+                </div>
+                <div class="form-group">
+                    <label for="newLinkUrl">URL</label>
+                    <input type="url" id="newLinkUrl" placeholder="https://discord.gg/ornek">
+                </div>
+                <div class="form-group">
+                    <label for="newLinkIcon">İkon (PNG)</label>
+                    <input type="file" id="newLinkIcon" accept="image/png">
+                </div>
+                <button onclick="addSocialLink()">İkon Ekle</button>
+            </div>
+        </div>
+        
+        <div class="section" id="whitelist">
+            <h1 style="margin-bottom: 2rem;">IP Whitelist</h1>
+            
+            <div class="card">
+                <h3>Whitelist'teki IP'ler</h3>
+                <div id="whitelistList"></div>
+                <p style="margin-top: 1rem; color: var(--muted-foreground); font-size: 0.875rem;">
+                    IP ekleme/çıkarma işlemleri Discord bot üzerinden yapılmalıdır.
+                </p>
+            </div>
+            
+        </div>
+    </div>
+    
+    <div class="volume-control">
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" class="volume-slider">
+    </div>
+    
+    <audio id="backgroundAudio" loop style="display: none;"></audio>
+    
+    <script>
+        let socialLinks = [];
+        let draggedElement = null;
+        
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = e.target.dataset.section;
+                
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                
+                e.target.classList.add('active');
+                document.getElementById(section).classList.add('active');
+            });
+        });
+        
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/987654321admin123456789/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.href = '/987654321admin123456789';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+        
+        async function uploadFile(inputId, fileName, fileType) {
+            const input = document.getElementById(inputId + 'File');
+            if (!input.files || !input.files[0]) {
+                showMessage('Lütfen bir dosya seçin', false);
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            formData.append('fileName', fileName);
+            formData.append('fileType', fileType);
+            
+            try {
+                const response = await fetch('/987654321admin123456789/api/upload', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(`${fileName} başarıyla yüklendi`, true);
+                    input.value = '';
+                } else {
+                    showMessage(data.error || 'Yükleme başarısız', false);
+                }
+            } catch (error) {
+                showMessage('Bir hata oluştu', false);
+            }
+        }
+        
+        async function loadSocialLinks() {
+            try {
+                const response = await fetch('/987654321admin123456789/api/social-links', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                socialLinks = data.links || [];
+                renderSocialLinks();
+            } catch (error) {
+                console.error('Error loading social links:', error);
+            }
+        }
+        
+        function renderSocialLinks() {
+            const container = document.getElementById('socialLinksList');
+            container.innerHTML = '';
+            
+            const sortedLinks = [...socialLinks].sort((a, b) => a.order - b.order);
+            
+            sortedLinks.forEach((link, index) => {
+                const item = document.createElement('div');
+                item.className = 'social-link-item';
+                item.draggable = true;
+                item.dataset.id = link.id;
+                
+                const iconInputId = `iconInput_${link.id}`;
+                item.innerHTML = `
+                    <span class="drag-handle">☰</span>
+                    <div class="social-link-info">
+                        <strong>${link.label}</strong>
+                        <small>${link.url}</small>
+                        <img src="${link.iconPath}" alt="${link.label}" style="width: 32px; height: 32px; margin-top: 0.5rem; border-radius: 4px;">
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${link.enabled ? 'checked' : ''} onchange="toggleLink('${link.id}', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                    <input type="text" value="${link.url}" onchange="updateLinkUrl('${link.id}', this.value)" style="width: 200px; margin: 0 0.5rem;">
+                    <input type="file" id="${iconInputId}" accept="image/png" style="display: none;" onchange="updateLinkIcon('${link.id}', this.files[0])">
+                    <button class="secondary" onclick="document.getElementById('${iconInputId}').click()">İkon Değiştir</button>
+                    <button class="danger" onclick="deleteLink('${link.id}')">Sil</button>
+                `;
+                
+                item.addEventListener('dragstart', (e) => {
+                    draggedElement = item;
+                    item.classList.add('dragging');
+                });
+                
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    draggedElement = null;
+                });
+                
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (draggedElement && draggedElement !== item) {
+                        const rect = item.getBoundingClientRect();
+                        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                        container.insertBefore(draggedElement, next ? item.nextSibling : item);
+                    }
+                });
+                
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedElement && draggedElement !== item) {
+                        updateOrder();
+                    }
+                });
+                
+                container.appendChild(item);
+            });
+        }
+        
+        function updateOrder() {
+            const items = document.querySelectorAll('.social-link-item');
+            items.forEach((item, index) => {
+                const id = item.dataset.id;
+                const link = socialLinks.find(l => l.id === id);
+                if (link) {
+                    link.order = index + 1;
+                }
+            });
+            saveSocialLinks();
+        }
+        
+        async function toggleLink(id, enabled) {
+            const link = socialLinks.find(l => l.id === id);
+            if (link) {
+                link.enabled = enabled;
+                await saveSocialLinks();
+            }
+        }
+        
+        async function updateLinkUrl(id, url) {
+            const link = socialLinks.find(l => l.id === id);
+            if (link) {
+                link.url = url;
+                await saveSocialLinks();
+            }
+        }
+        
+        async function updateLinkIcon(id, iconFile) {
+            if (!iconFile) return;
+            
+            const link = socialLinks.find(l => l.id === id);
+            if (!link) return;
+            
+            const formData = new FormData();
+            formData.append('icon', iconFile);
+            const fileName = `icon_${id}_${Date.now()}.png`;
+            formData.append('fileName', fileName);
+            formData.append('fileType', 'images');
+            
+            try {
+                const response = await fetch('/987654321admin123456789/api/social-links/icon', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    link.iconPath = data.iconPath;
+                    await saveSocialLinks();
+                    renderSocialLinks();
+                    showMessage('İkon güncellendi', true);
+                } else {
+                    showMessage(data.error || 'İkon güncellenemedi', false);
+                }
+            } catch (error) {
+                console.error('Icon update error:', error);
+                showMessage('İkon güncellenirken hata oluştu', false);
+            }
+        }
+        
+        async function deleteLink(id) {
+            if (!confirm('Bu ikonu silmek istediğinize emin misiniz?')) return;
+            
+            socialLinks = socialLinks.filter(l => l.id !== id);
+            await saveSocialLinks();
+            renderSocialLinks();
+        }
+        
+        async function addSocialLink() {
+            const label = document.getElementById('newLinkLabel').value;
+            const url = document.getElementById('newLinkUrl').value;
+            const iconFile = document.getElementById('newLinkIcon').files[0];
+            
+            if (!label || !url) {
+                showMessage('Label ve URL gerekli', false);
+                return;
+            }
+            
+            let iconPath = '/images/default.png';
+            
+            if (iconFile) {
+                const formData = new FormData();
+                formData.append('icon', iconFile);
+                const fileName = `icon_${Date.now()}.png`;
+                formData.append('fileName', fileName);
+                formData.append('fileType', 'images');
+                
+                try {
+                    const response = await fetch('/987654321admin123456789/api/social-links/icon', {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        iconPath = data.iconPath;
+                    }
+                } catch (error) {
+                    console.error('Icon upload error:', error);
+                }
+            }
+            
+            const maxOrder = socialLinks.length > 0 ? Math.max(...socialLinks.map(l => l.order)) : 0;
+            const newId = `custom_${Date.now()}`;
+            
+            socialLinks.push({
+                id: newId,
+                label,
+                url,
+                enabled: true,
+                iconPath,
+                order: maxOrder + 1
+            });
+            
+            await saveSocialLinks();
+            renderSocialLinks();
+            
+            document.getElementById('newLinkLabel').value = '';
+            document.getElementById('newLinkUrl').value = '';
+            document.getElementById('newLinkIcon').value = '';
+            
+            showMessage('İkon eklendi', true);
+        }
+        
+        async function saveSocialLinks() {
+            try {
+                const response = await fetch('/987654321admin123456789/api/social-links', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ links: socialLinks })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('Değişiklikler kaydedildi', true);
+                }
+            } catch (error) {
+                console.error('Error saving social links:', error);
+                showMessage('Kaydetme hatası', false);
+            }
+        }
+        
+        async function loadWhitelist() {
+            try {
+                const response = await fetch('/987654321admin123456789/api/whitelist', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                renderWhitelist(data.ips || []);
+            } catch (error) {
+                console.error('Error loading whitelist:', error);
+            }
+        }
+        
+        function renderWhitelist(ips) {
+            const container = document.getElementById('whitelistList');
+            container.innerHTML = '';
+            
+            ips.forEach(ip => {
+                const item = document.createElement('div');
+                item.className = 'whitelist-item';
+                item.innerHTML = `<code>${ip}</code>`;
+                container.appendChild(item);
+            });
+        }
+        
+        function showMessage(message, isSuccess) {
+            const msgEl = document.getElementById('successMessage');
+            msgEl.textContent = message;
+            msgEl.style.background = isSuccess 
+                ? 'oklch(70% .15 150 / 0.2)' 
+                : 'oklch(70.4% .191 22 / 0.2)';
+            msgEl.style.borderColor = isSuccess 
+                ? 'oklch(70% .15 150)' 
+                : 'oklch(70.4% .191 22)';
+            msgEl.style.color = isSuccess 
+                ? 'oklch(70% .15 150)' 
+                : 'oklch(70.4% .191 22)';
+            msgEl.classList.add('show');
+            
+            setTimeout(() => {
+                msgEl.classList.remove('show');
+            }, 3000);
+        }
+        
+        const adminSongs = [
+            '/media/admin.mp3',
+            '/media/admin2.mp3',
+            '/media/admin3.mp3',
+            '/media/admin4.mp3'
+        ];
+        
+        const audio = document.getElementById('backgroundAudio');
+        const volumeSlider = document.getElementById('volumeSlider');
+        
+        if (audio && volumeSlider) {
+            const randomSong = adminSongs[Math.floor(Math.random() * adminSongs.length)];
+            audio.src = randomSong;
+            audio.volume = parseFloat(volumeSlider.value);
+            
+            volumeSlider.addEventListener('input', (e) => {
+                audio.volume = parseFloat(e.target.value);
+            });
+            
+            audio.play().catch(err => {
+                console.log('Autoplay prevented:', err);
+            });
+        }
+        
+        loadSocialLinks();
+        loadWhitelist();
+    </script>
+</body>
+</html>
+
